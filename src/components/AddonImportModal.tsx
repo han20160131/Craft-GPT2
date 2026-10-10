@@ -29,7 +29,7 @@ export const AddonImportModal: React.FC<AddonImportModalProps> = ({
     try {
       const result = await importAddonFile(file);
       if (result.components.length === 0) {
-        throw new Error('未在此檔案中偵測到有效的 Minecraft Bedrock JSON 模組組件。');
+        throw new Error('未在此檔案中偵測到任何 Minecraft Bedrock 模組檔案。若此為 .mcaddon 或 .mcpack，請確認壓縮包是否包含行為包 (BP)、材質包 (RP) 或 .json 相關檔案。');
       }
       setImportedItems(result.components);
       onImportSuccess(result.components, result.projectName);
@@ -116,11 +116,20 @@ export const AddonImportModal: React.FC<AddonImportModalProps> = ({
         )}
 
         {errorMsg && (
-          <div className="flex items-center gap-2 p-3 rounded bg-rose-950/50 border border-rose-800 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{errorMsg}</span>
+          <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="whitespace-pre-line leading-relaxed">{errorMsg}</div>
           </div>
         )}
+
+        <div className="p-3 rounded-lg bg-[#191919] border border-[#2c2c2c] text-[11px] text-neutral-400 space-y-1">
+          <div className="font-semibold text-neutral-300 flex items-center gap-1">
+            <span>💡 為什麼有些正版 .mcaddon 無法直接編輯？</span>
+          </div>
+          <p className="leading-relaxed">
+            Minecraft 官方商城 (Marketplace) 出售的官方模組受到微軟 DRM 二進制加密保護，外部工具無法直接讀取密文。若要修改模組，請使用創作者發布之<strong>社群開源模組 (.mcaddon / .zip)</strong>，或直接向 CraftGPT 描述需求為您重新打造！
+          </p>
+        </div>
 
         {importedItems.length > 0 && (
           <div className="p-3 rounded bg-[#171717] border border-[#2a2a2a] space-y-2">

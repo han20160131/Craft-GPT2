@@ -13,6 +13,7 @@ import { ThoughtInspectorModal } from './components/ThoughtInspectorModal';
 import { AuthModal } from './components/AuthModal';
 import { ComponentViewModal } from './components/ComponentViewModal';
 import { TextureGeneratorModal } from './components/TextureGeneratorModal';
+import { ExportModal } from './components/ExportModal';
 import { exportProjectToMcAddon, downloadBlob } from './utils/packExporter';
 import { 
   AppUser,
@@ -34,6 +35,8 @@ export default function App() {
   const [isTextureModalOpen, setIsTextureModalOpen] = useState(false);
   const [initialTextureForModal, setInitialTextureForModal] = useState<GeneratedTexture | null>(null);
   const [inspectingComponent, setInspectingComponent] = useState<AddonComponent | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [projectToExportModal, setProjectToExportModal] = useState<Project | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
 
   // User Auth & Mode State
@@ -262,13 +265,31 @@ export default function App() {
 
   // Handle Import Success
   const handleImportSuccess = (components: AddonComponent[], suggestedName?: string) => {
+    if (!activeProjectId || projects.length === 0) {
+      const newProj: Project = {
+        id: `proj-${Date.now()}`,
+        name: suggestedName || '匯入的模組專案',
+        description: '由 .mcaddon / .mcpack 匯入之模組',
+        namespace: 'custom',
+        version: [1, 0, 0],
+        createdAt: Date.now(),
+        components,
+      };
+      setProjects((prev) => [...prev, newProj]);
+      setActiveProjectId(newProj.id);
+      if (currentUser) saveProjectToCloud(currentUser.uid, newProj);
+      return;
+    }
+
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id === activeProjectId) {
-          const updated = {
+          const newPaths = new Set(components.map((c) => c.filePath));
+          const existingFiltered = p.components.filter((c) => !newPaths.has(c.filePath));
+          const updated: Project = {
             ...p,
-            name: suggestedName || p.name,
-            components: [...p.components, ...components],
+            name: (p.name === '我的模組專案' && suggestedName) ? suggestedName : p.name,
+            components: [...existingFiltered, ...components],
           };
           if (currentUser) saveProjectToCloud(currentUser.uid, updated);
           return updated;
@@ -279,13 +300,11 @@ export default function App() {
   };
 
   // Handle Export specific project
-  const handleExportProject = async (projectToExport: Project) => {
-    try {
-      const blob = await exportProjectToMcAddon(projectToExport);
-      const filename = `${projectToExport.name.replace(/\s+/g, '_') || 'CustomAddon'}.mcaddon`;
-      downloadBlob(blob, filename);
-    } catch (err: any) {
-      alert(`匯出失敗: ${err.message}`);
+  const handleExportProject = (projectToExport?: Project) => {
+    const target = projectToExport || activeProject;
+    if (target) {
+      setProjectToExportModal(target);
+      setIsExportModalOpen(true);
     }
   };
 
@@ -386,7 +405,11 @@ export default function App() {
             namespace: projectToSend.namespace,
             components: projectToSend.components || [],
           } : null,
-          systemPrompt: `當前使用者正在開發 Minecraft 基岩版 Add-on 模組資料夾「${projectToSend?.name || '模組專案'}」(命名空間: ${projectToSend?.namespace || 'custom'})。請針對 Bedrock 1.21+ 格式提供準確合法、可以直接放入行為包或材質包的代碼。`,
+          systemPrompt: `當前使用者正在開發 Minecraft 基岩版 Add-on 模組專案「${projectToSend?.name || '模組專案'}」(命名空間: ${projectToSend?.namespace || 'custom'})。
+請深度貫徹 Bedrock 1.21+ 規範：
+1. 方塊六面表現：六面相同做法 A（1張平面貼圖在 blocks.json 自動貼6面）與六面不同做法 B（多張獨立貼圖在 blocks.json 用 textures: { "up", "down", "side" }）。
+2. 盔甲 3D 穿戴：物品欄 2D 圖示（item_texture.json）vs 穿戴展開圖（Layer 1: 頭盔/胸甲/靴子, Layer 2: 護腿），透過 RP/attachables/ 綁定內建人體骨骼模型。
+3. 絕不給出死板原版食譜，以上帝級 AI 創造力提供合法的標準代碼。`,
         }),
       });
 
@@ -711,6 +734,16 @@ export default function App() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={handleImportSuccess}
+      />
+
+      {/* Addon Multi-Channel Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => {
+          setIsExportModalOpen(false);
+          setProjectToExportModal(null);
+        }}
+        project={projectToExportModal || activeProject}
       />
     </div>
   );

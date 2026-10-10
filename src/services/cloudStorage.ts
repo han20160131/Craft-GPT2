@@ -93,8 +93,16 @@ function notifyAuthListeners(user: AppUser | null) {
 export function subscribeToAuth(callback: (user: AppUser | null) => void) {
   authListeners.add(callback);
   
-  // Initial check
-  const activeUser = getStoredActiveUser();
+  // Initial check - if no user stored, provide smooth guest user
+  let activeUser = getStoredActiveUser();
+  if (!activeUser) {
+    activeUser = {
+      uid: 'usr_guest_creator',
+      email: null,
+      displayName: '麥塊創作者 (訪客模式)',
+    };
+    setStoredActiveUser(activeUser);
+  }
   callback(activeUser);
 
   // Sync with Firebase Auth
@@ -110,7 +118,11 @@ export function subscribeToAuth(callback: (user: AppUser | null) => void) {
       const stored = getStoredActiveUser();
       // If Firebase says signed out and current stored user is from Firebase (not usr_), clear
       if (stored && !stored.uid.startsWith('usr_')) {
-        setStoredActiveUser(null);
+        setStoredActiveUser({
+          uid: 'usr_guest_creator',
+          email: null,
+          displayName: '麥塊創作者 (訪客模式)',
+        });
       }
     }
   });
@@ -119,6 +131,16 @@ export function subscribeToAuth(callback: (user: AppUser | null) => void) {
     authListeners.delete(callback);
     unsubscribeFirebase();
   };
+}
+
+export function loginAsGuest(): AppUser {
+  const guestUser: AppUser = {
+    uid: 'usr_guest_creator',
+    email: null,
+    displayName: '麥塊創作者 (訪客模式)',
+  };
+  setStoredActiveUser(guestUser);
+  return guestUser;
 }
 
 // 1. 建立帳號 (Register with Email & Password)

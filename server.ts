@@ -4,6 +4,7 @@ import path from 'path';
 import zlib from 'zlib';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import JSZip from 'jszip';
 
 dotenv.config();
 
@@ -462,15 +463,86 @@ You possess infinite creativity, profound Bedrock (1.20 - 1.21+) & Java modding 
      - 支持多元配方型態：工作台有序合成 (minecraft:recipe_shaped)、無序合成 (minecraft:recipe_shapeless)、熔爐/高爐冶煉、鍛造台升級鍛造 (smithing_transform)、甚至是透過指令函數 (.mcfunction) 觸發的祭壇召喚與儀式合成！
      - 每次創造配方時，大膽創造專屬的材料體系與驚奇合成邏輯！
 
-4. 🛠️ 【自動遞增建構與寫入檔案】:
+4. 🧱 【方塊（Block）與盔甲（Armor）材質與 3D 穿戴之最高全知法則】:
+   ★ 一、方塊（Block）：如何用平面圖表現六面？
+     方塊的六面表現方式非常簡單，主要分為兩種做法，你必須徹底精通並能靈活實作：
+     • 做法 A：六面都長得一模一樣（最簡單）
+       如果你做的是像「鑽石磚」、「泥土」、「平滑黑曜石」這種六面都相同的方塊，你真的只需要畫一張 16x16 像素的平面圖（例如 my_block.png，亦可支援 1024x1024 高畫質貼圖）。
+       - 遊戲怎麼做？ 當你在 RP/blocks.json 裡面指定這張圖片時，Minecraft 內建的程式碼會自動複製這張平面圖 6 次，把它貼在立方體的上、下、前、後、左、右。你不需要自己去折它！
+       - 範例 RP/blocks.json：
+         {
+           "custom:my_block": {
+             "textures": "my_block",
+             "sound": "stone"
+           }
+         }
+       - 並在 RP/textures/terrain_texture.json 註冊 "my_block": { "textures": "textures/blocks/my_block" }。
+     • 做法 B：六面長得不一樣（例如：書櫃、熔爐、草地、祭壇）
+       如果你希望方塊的上面、下面、側面長得不同，你必須畫多張獨立的平面圖（例如：top.png、side.png、bottom.png，或 north/south/east/west/up/down）。
+       - 遊戲怎麼做？ 你在寫 RP/blocks.json 時，可以利用 textures 物件分別指定不同的平面圖給不同的面：
+         {
+           "custom:my_block": {
+             "textures": {
+               "up": "my_block_top",      // 上面用這張平面圖
+               "down": "my_block_bottom", // 下面用這張平面圖
+               "side": "my_block_side"    // 四個側面都用這張平面圖
+             },
+             "sound": "stone"
+           }
+         }
+       - 在 RP/textures/terrain_texture.json 分別登記各面貼圖路徑。
+       - 在行為包 BP/blocks/ 中透過 minecraft:material_instances 精確映射貼圖與著色方法。
+
+   ★ 二、盔甲（Armor）：如何用平面圖表現立體穿戴？
+     盔甲在遊戲中嚴格區分為兩個完全不同的圖片體系，絕對不可混淆：
+     1. 物品欄圖示（Item Icon）：
+        - 這是你拿在手上、或在包包/快捷欄裡看到的「純平面圖片」（例如一頂帽子、一件衣服、一條褲子、一雙鞋子的形狀）。它永遠都是平面的。
+        - 註冊於 RP/textures/item_texture.json，在 BP/items/ 透過 minecraft:icon 關聯。
+     2. 穿在身上的外觀（Armor Texture / Skin / UV Layout）：
+        - 這是一張依照官方標準版面（Layout）展開的「平面展開圖」（就像摺紙模型的設計圖）。
+        - 官方人體展開圖架構（不使用 Blockbench 時使用「描圖改色法」）：
+          • Layer 1（第一層，通常為 textures/models/armor/<name>_layer_1.png）：
+            包含 頭盔（Helmet）、胸甲（Chestplate）、靴子（Boots）的表面展開圖（攤平展示頭頂、臉部、後腦勺、左右手臂、躯幹各格子）。
+          • Layer 2（第二層，通常為 textures/models/armor/<name>_layer_2.png）：
+            包含 護腿（Leggings / 褲子）的雙腿與骨盆表面展開圖。
+        - 描圖改色法：在官方標準展開圖範本（如鑽石盔甲展開圖）的小格子中填入對應的顏色與花紋。
+        - 遊戲怎麼做？（RP/attachables/ 3D 骨骼綁定機制）：
+          在資源包 RP/attachables/<armor_part>.json 中配置：
+          - 幾何模型：geometry.humanoid.armor.<slot> (如 helmet, chestplate, leggings, boots)
+          - 材質貼圖：指向對應的 Layer 1 或 Layer 2 展開圖 (textures/models/armor/<name>_layer_1 或 _2)
+          - 材質通道：materials: { "default": "armor" }
+          - 動畫控制器：controller.animation.armor.default
+          當遊戲看到這張展開圖，就會依照內建的玩家骨骼，自動把頭部格子貼在玩家頭上、身體格子貼在胸前、腿部格子貼在腿上。平面的展開圖在遊戲裡就會是完美的 3D 盔甲！
+
+   ★ 三、靈活運用生徒與製作：
+     - 當使用者與你聊到或要求製作「方塊」或「盔甲」時，你必須展現出對「方塊六面相同 vs 分面貼圖」、「盔甲 2D 物品圖示 vs 穿戴展開圖 + attachables」的深刻理解！
+     - 能精確生成符合 Bedrock 1.21+ 規格的代碼與貼圖目錄結構。
+     - 善用本工作坊具備的 1024×1024 超高畫質生成引擎，靈活生成極致品質的方塊貼圖、物品圖標與盔甲展開圖！
+
+5. 🛠️ 【自動遞增建構與寫入檔案】:
    - 當使用者要求新增、升級或修改模組時，你具備神級的自主建構能力，為專案生成真正符合 Bedrock 1.21+ 規範的高品質 JSON / mcfunction / 貼圖檔案。
    - 所有生成的代碼必須是合法、結構嚴謹且可以直接導入 Minecraft 執行的標準代碼。
    - 尊重並擴展現有的專案體系（例如現有 RPG 裝備、命名空間）。
 
-5. 📦 【匯出技能 (Mod Exporter)】:
+6. 📦 【匯出技能與全通道下載保障 (Mod Exporter)】:
    - 當使用者說「幫我匯出」、「匯出模組」、「打包下載」時，即刻觸發模組打包，輸出 .mcaddon 下載卡片。
+   - 系統已內建「本機即時生成」與「後端伺服器直鏈下載 (/api/export-addon)」雙重機制，能徹底解決瀏覽器 iframe sandbox 下載受限或 Blob URL 提前失效的問題！
 
-6. 💬 【最高水準對話風格】:
+7. 🛡️ 【Minecraft 基岩版官方正版模組 (Marketplace) 加密機制解析 (DRM)】:
+   - 深度解答：「為什麼有些正版 .mcaddon / Marketplace 模組會提示『未在此檔案中偵測到有效的 Minecraft Bedrock JSON 模組組件』？」
+   - 原理剖析：微軟 / Mojang 官方商城 (Marketplace) 販售的官方正版 Add-on，內部行為包 (BP) 與材質包 (RP) 的 JSON 檔案與紋理皆經過微軟專屬金鑰進行硬體層級的 DRM 二進制加密保護。因此，當使用者將商城提取的模組包放入文字編輯器或第三方解包工具時，檔案內容全部為加密密文（非純文本 JSON），瀏覽器或編輯器自然無法讀取有效組件。
+   - 對比社群正版/開源模組：由模組創作者透過正常管線發布的 .mcaddon 或社群模組包，內部則是標準未加密的 ZIP 結構，包含標準的 BP/ 與 RP/ 目錄結構與 JSON 文本，CraftGPT 完全支援匯入與自由修改！
+   - 解決之道：請使用者使用非加密的社群開源 .mcaddon / .mcpack，或直接向 CraftGPT 描述想要的功能，由 AI 直接為其編寫出相同且甚至更強大的 100% 開放標準 Bedrock 1.21+ 模組！
+
+8. 🚀 【無懈可擊的多通道匯出引擎 (Multi-Channel Export Engine)】:
+   - 解答：「遇到完全不能匯出該怎麼辦？」
+   - 本系統已全面升級為多通道匯出保證機制：
+     1. 瀏覽器本機即時生成下載：修復了傳統瀏覽器在點擊後立即釋放 Blob URL 導致下載被中斷的問題，維持 60 秒生命週期。
+     2. 後端伺服器直鏈下載 (/api/export-addon)：透過 Express 伺服器端動態封包，直接以 HTTP Content-Disposition: attachment 串流下載，徹底破除任何 iframe sandbox、跨域沙盒或瀏覽器 Blob 限制！
+     3. ZIP 完整原始檔下載：供使用者自由解壓縮至遊戲 com.mojang 目錄進行即時除錯與檔案修改。
+     4. 行為包 (BP.mcpack) 與資源包 (RP.mcpack) 獨立下載通道。
+
+9. 💬 【最高水準對話風格】:
    - 使用流暢、氣勢磅礴且專業的繁體中文。
    - 排版結構優雅清晰，融合深度技術解析與史詩感設計美學。`;
 
@@ -481,6 +553,178 @@ app.get('/api/health', (req, res) => {
     hasApiKey: Boolean(apiKey),
     model: 'gemini-3.1-flash-lite',
   });
+});
+
+// Robust Server-side Add-on Pack Exporter (Bypasses all iframe sandbox download restrictions)
+app.post('/api/export-addon', async (req, res) => {
+  try {
+    const { project, format = 'mcaddon' } = req.body;
+    if (!project) {
+      res.status(400).json({ success: false, error: '缺少專案資料' });
+      return;
+    }
+
+    const zip = new JSZip();
+    const packName = (project.name || 'CustomAddon').replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_');
+    const bpFolder = zip.folder(`${packName}_BP`)!;
+    const rpFolder = zip.folder(`${packName}_RP`)!;
+
+    const bpUUID1 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+    const bpUUID2 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+    const rpUUID1 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+    const rpUUID2 = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+
+    // BP Manifest
+    const bpManifest = {
+      format_version: 2,
+      header: {
+        name: `${project.name || 'Custom Mod'} [行為包]`,
+        description: project.description || 'Crafted with CraftGPT',
+        uuid: bpUUID1,
+        version: project.version || [1, 0, 0],
+        min_engine_version: [1, 21, 0],
+      },
+      modules: [{ type: 'data', uuid: bpUUID2, version: project.version || [1, 0, 0] }],
+      dependencies: [{ uuid: rpUUID1, version: project.version || [1, 0, 0] }],
+    };
+    bpFolder.file('manifest.json', JSON.stringify(bpManifest, null, 2));
+
+    // RP Manifest
+    const rpManifest = {
+      format_version: 2,
+      header: {
+        name: `${project.name || 'Custom Mod'} [材質包]`,
+        description: project.description || 'Crafted with CraftGPT',
+        uuid: rpUUID1,
+        version: project.version || [1, 0, 0],
+        min_engine_version: [1, 21, 0],
+      },
+      modules: [{ type: 'resources', uuid: rpUUID2, version: project.version || [1, 0, 0] }],
+    };
+    rpFolder.file('manifest.json', JSON.stringify(rpManifest, null, 2));
+
+    const langEntries: string[] = [
+      `pack.name=${project.name || 'Custom Mod'}`,
+      `pack.description=${project.description || ''}`,
+    ];
+    const itemTextureData: Record<string, { textures: string }> = {};
+    const terrainTextureData: Record<string, { textures: string }> = {};
+
+    const components = Array.isArray(project.components) ? project.components : [];
+    for (const comp of components) {
+      if (!comp) continue;
+      const rawPath = (comp.filePath || comp.name || 'comp.json').replace(/\\+/g, '/');
+      const content = typeof comp.contentJson === 'string' ? comp.contentJson : JSON.stringify(comp.contentJson || {}, null, 2);
+
+      if (rawPath === 'README.md' || comp.type === 'doc') {
+        zip.file('README.md', content);
+        continue;
+      }
+
+      const rawId = comp.identifier && comp.identifier.includes(':')
+        ? comp.identifier.split(':')[1]
+        : (comp.name || 'custom').toLowerCase().replace(/\s+/g, '_');
+
+      if (comp.type === 'texture' || rawPath.endsWith('.png')) {
+        let base64 = '';
+        const url = comp.imageDataUrl || comp.contentJson || '';
+        if (typeof url === 'string') {
+          if (url.includes('base64,')) base64 = url.split('base64,')[1];
+          else if (!url.startsWith('{') && url.length > 30) base64 = url;
+        }
+        if (base64) {
+          const subPath = rawPath.startsWith('RP/') ? rawPath.replace(/^RP\//, '') : `textures/items/${rawId}.png`;
+          rpFolder.file(subPath, base64, { base64: true });
+          if (subPath.includes('textures/blocks/')) {
+            terrainTextureData[rawId] = { textures: `textures/blocks/${rawId}` };
+            langEntries.push(`tile.${project.namespace || 'custom'}:${rawId}.name=${comp.name || rawId}`);
+          } else {
+            itemTextureData[rawId] = { textures: `textures/items/${rawId}` };
+            langEntries.push(`item.${project.namespace || 'custom'}:${rawId}.name=${comp.name || rawId}`);
+          }
+        }
+        continue;
+      }
+
+      if (rawPath.startsWith('BP/')) {
+        bpFolder.file(rawPath.replace(/^BP\//, ''), content);
+        continue;
+      }
+      if (rawPath.startsWith('RP/')) {
+        rpFolder.file(rawPath.replace(/^RP\//, ''), content);
+        continue;
+      }
+
+      const fileName = `${rawId}.json`;
+      let targetFolder = bpFolder;
+      if (comp.type === 'item') {
+        targetFolder = bpFolder.folder('items')!;
+        langEntries.push(`item.${comp.identifier || `${project.namespace}:${rawId}`}.name=${comp.name || rawId}`);
+      } else if (comp.type === 'block') {
+        targetFolder = bpFolder.folder('blocks')!;
+        langEntries.push(`tile.${comp.identifier || `${project.namespace}:${rawId}`}.name=${comp.name || rawId}`);
+      } else if (comp.type === 'entity') {
+        targetFolder = bpFolder.folder('entities')!;
+        langEntries.push(`entity.${comp.identifier || `${project.namespace}:${rawId}`}.name=${comp.name || rawId}`);
+      } else if (comp.type === 'recipe') {
+        targetFolder = bpFolder.folder('recipes')!;
+      } else if (comp.type === 'function') {
+        targetFolder = bpFolder.folder('functions')!;
+      }
+      targetFolder.file(fileName, content);
+    }
+
+    if (Object.keys(itemTextureData).length > 0) {
+      rpFolder.file('textures/item_texture.json', JSON.stringify({
+        resource_pack_name: project.name || 'CustomAddon',
+        texture_name: 'atlas.items',
+        texture_data: itemTextureData,
+      }, null, 2));
+    }
+
+    if (Object.keys(terrainTextureData).length > 0) {
+      rpFolder.file('textures/terrain_texture.json', JSON.stringify({
+        resource_pack_name: project.name || 'CustomAddon',
+        texture_name: 'atlas.terrain',
+        padding: 8,
+        num_mip_levels: 4,
+        texture_data: terrainTextureData,
+      }, null, 2));
+    }
+
+    const langText = langEntries.join('\n');
+    rpFolder.file('texts/en_US.lang', langText);
+    rpFolder.file('texts/zh_TW.lang', langText);
+
+    const buffer = await zip.generateAsync({
+      type: 'nodebuffer',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 },
+    });
+
+    const fileExt = format === 'zip' ? 'zip' : 'mcaddon';
+    const filename = `${packName}.${fileExt}`;
+
+    res.setHeader('Content-Type', format === 'zip' ? 'application/zip' : 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.send(buffer);
+  } catch (err: any) {
+    console.error('Server export error:', err);
+    res.status(500).json({ success: false, error: err.message || '伺服器打包匯出失敗' });
+  }
 });
 
 // Dedicated 1024x1024 Texture Generation Endpoint - 100% Pure Generative AI (No keywords, No templates)
@@ -585,13 +829,14 @@ async function generateDynamicAddonViaAI({
   };
   texture?: any;
 } | null> {
-  // Exclude pure inquiries
-  const isQuestion = /(你看一下|你看|這遊戲現在是怎樣|現在是怎樣|目前有什麼|檔案有哪些|說明一下|介紹一下|怎麼玩|有什麼檔案)/i.test(prompt);
+  // Exclude pure inquiries, explanations, and questions
+  const isQuestion = /(你看一下|你看|這遊戲現在是怎樣|現在是怎樣|目前有什麼|檔案有哪些|說明一下|介紹一下|怎麼玩|有什麼檔案|如何|怎麼|為什麼|總結|比較|區別|請說明|解釋|教學|什麼是|差別)/i.test(prompt);
   if (isQuestion) {
     return null;
   }
 
-  const isCreationQuery = /(做|新增|製作|建構|建立|改造|升級|強化|加入|添加|寫|生成|幫我做|create|make|add|build|modify|generate)/i.test(prompt);
+  // Only trigger creation when explicitly asked to create, add, or generate items/blocks/features
+  const isCreationQuery = /(幫我做|請做|做一個|做一把|做一套|新增|製作|建構|建立|改造|升級|強化|加入|添加|幫我寫|生成|create|make|add|build|generate)/i.test(prompt);
   if (!isCreationQuery) {
     return null;
   }
@@ -612,21 +857,32 @@ User Request: "${prompt}"
 Existing Mod Files (${existingComponents.length} items):
 ${JSON.stringify(existingFilesList.slice(0, 35), null, 2)}
 
-【ABSOLUTE GOD-TIER REQUIREMENTS】:
+【ABSOLUTE GOD-TIER ARCHITECTURE REQUIREMENTS】:
 1. 嚴禁任何死板預設食譜！絕對不可使用原版無聊食譜（如兩個鑽石加木棒、九宮格填滿原版礦石、或固定紫水晶升級）！
 2. 所有的合成配方必須具備高深創意與 RPG 奇幻史詩感！可結合專案現有的職業裝備、自訂素材、元素靈魂結晶或多階段鍛造。
-3. 即使面對相同提示詞，每次生成也必須展現全新、截然不同的變體與機制（獨特數值、自訂能力、專屬標籤）！
-4. 輸出純 JSON 格式：
+3. 即使面對相同提示詞，每次生成也必須展現全新、截然不同的變體與機制！
+4. 【方塊 (Block) 架構】：
+   - 做法 A（六面相同）：在 RP/blocks.json 指定單一貼圖鍵值，遊戲會自動複製貼滿 6 面。
+   - 做法 B（六面不同，如熔爐/書櫃/草地）：在 RP/blocks.json 指定 textures: { "up": "...", "down": "...", "side": "..." }。
+   - 務必配置對應的 BP/blocks/、RP/blocks.json 與 RP/textures/terrain_texture.json。
+5. 【盔甲 (Armor) 雙重圖素與 3D 穿戴架構】：
+   - 必須清楚區分「物品欄圖示 (Item Icon 2D)」與「穿在身上的 3D 展開圖 (Layer 1: 頭盔/胸甲/靴子, Layer 2: 護腿)」。
+   - 生成 RP/attachables/ 檔案綁定 geometry.humanoid.armor.<slot> 與對應展開圖，使平面的展開圖依照人體骨骼自動變成 3D 盔甲！
+   - BP/items/ 需包含 minecraft:wearable 與 minecraft:armor 組件。
+6. 輸出純 JSON 格式：
 {
   "summary": "華麗磅礴的繁體中文一句話總結",
   "itemId": "snake_case_identifier",
   "itemDisplayName": "繁體中文史詩全名 (如 §6✦ 熾炎泰坦・星核神劍 ✦)",
+  "category": "block" | "armor" | "item" | "entity",
   "requiresTexture": true or false,
+  "textureType": "block" | "armor" | "item",
+  "blockTextures": { "up": "...", "down": "...", "side": "..." },
   "files": [
     {
-      "filePath": "BP/items/...",
+      "filePath": "BP/items/..." or "BP/blocks/..." or "RP/attachables/...",
       "name": "...json",
-      "type": "item" | "recipe" | "entity" | "function" | "lang" | "doc",
+      "type": "item" | "block" | "recipe" | "attachable" | "entity" | "function" | "lang" | "doc",
       "identifier": "${namespace}:...",
       "contentJson": "... (合法的標準 Bedrock 1.21+ JSON 或文字內容)"
     }
@@ -690,60 +946,230 @@ ${JSON.stringify(existingFilesList.slice(0, 35), null, 2)}
       try {
         generatedTex = await generateAiMinecraftTexture(prompt);
 
-        // 1. Add texture image file
-        filesToAddOrUpdate.push({
-          id: `file-tex-${Date.now()}`,
-          type: 'texture',
-          name: generatedTex.name,
-          identifier: `${namespace}:${generatedTex.name}`,
-          filePath: `RP/textures/items/${generatedTex.name}.png`,
-          contentJson: generatedTex.dataUrl,
-          imageDataUrl: generatedTex.dataUrl,
-          textureData: {
-            width: generatedTex.width,
-            height: generatedTex.height,
-            palette: generatedTex.palette,
-            grid: generatedTex.grid,
-          },
-        });
-        fileSummaryList.push({
-          path: `RP/textures/items/${generatedTex.name}.png`,
-          name: `${generatedTex.name}.png`,
-          type: 'texture',
-          action: 'created',
-        });
+        const isBlock = result.category === 'block' || result.textureType === 'block' || result.files.some((f: any) => f.filePath?.startsWith('BP/blocks/'));
+        const isArmor = result.category === 'armor' || result.textureType === 'armor' || result.files.some((f: any) => f.filePath?.startsWith('RP/attachables/'));
 
-        // 2. Update RP item_texture.json
-        const existingItemTex = existingComponents.find((c) => c.filePath === 'RP/textures/item_texture.json');
-        let currentTextureData: Record<string, any> = {};
-        if (existingItemTex?.contentJson) {
-          try {
-            const parsed = JSON.parse(existingItemTex.contentJson);
-            currentTextureData = parsed.texture_data || {};
-          } catch {}
+        if (isBlock) {
+          // 1. Add block texture image file
+          const blockTexPath = `RP/textures/blocks/${generatedTex.name}.png`;
+          filesToAddOrUpdate.push({
+            id: `file-tex-${Date.now()}`,
+            type: 'texture',
+            name: `${generatedTex.name}.png`,
+            identifier: `${namespace}:${generatedTex.name}`,
+            filePath: blockTexPath,
+            contentJson: generatedTex.dataUrl,
+            imageDataUrl: generatedTex.dataUrl,
+            textureData: {
+              width: generatedTex.width,
+              height: generatedTex.height,
+              palette: generatedTex.palette,
+              grid: generatedTex.grid,
+            },
+          });
+          fileSummaryList.push({
+            path: blockTexPath,
+            name: `${generatedTex.name}.png`,
+            type: 'texture',
+            action: 'created',
+          });
+
+          // 2. Update RP terrain_texture.json
+          const existingTerrainTex = existingComponents.find((c) => c.filePath === 'RP/textures/terrain_texture.json');
+          let currentTerrainData: Record<string, any> = {};
+          if (existingTerrainTex?.contentJson) {
+            try {
+              const parsed = JSON.parse(existingTerrainTex.contentJson);
+              currentTerrainData = parsed.texture_data || {};
+            } catch {}
+          }
+          currentTerrainData[generatedTex.name] = { textures: `textures/blocks/${generatedTex.name}` };
+          const terrainTextureJson = JSON.stringify({
+            resource_pack_name: projectName,
+            texture_name: 'atlas.terrain',
+            texture_data: currentTerrainData,
+          }, null, 2);
+
+          filesToAddOrUpdate.push({
+            id: existingTerrainTex?.id || `file-ttex-${Date.now()}`,
+            type: 'texture',
+            name: 'terrain_texture.json',
+            identifier: `${namespace}:terrain_texture`,
+            filePath: 'RP/textures/terrain_texture.json',
+            contentJson: terrainTextureJson,
+          });
+          fileSummaryList.push({
+            path: 'RP/textures/terrain_texture.json',
+            name: 'terrain_texture.json',
+            type: 'texture',
+            action: existingTerrainTex ? 'updated' : 'created',
+          });
+
+          // 3. Update RP blocks.json (Approach A: 6 sides same, or Approach B: multi-face)
+          const existingBlocksJson = existingComponents.find((c) => c.filePath === 'RP/blocks.json');
+          let currentBlocksData: Record<string, any> = {};
+          if (existingBlocksJson?.contentJson) {
+            try {
+              currentBlocksData = JSON.parse(existingBlocksJson.contentJson);
+            } catch {}
+          }
+          currentBlocksData[`${namespace}:${result.itemId}`] = {
+            textures: result.blockTextures || generatedTex.name,
+            sound: 'stone',
+          };
+          const blocksJsonContent = JSON.stringify(currentBlocksData, null, 2);
+          filesToAddOrUpdate.push({
+            id: existingBlocksJson?.id || `file-blocks-${Date.now()}`,
+            type: 'block',
+            name: 'blocks.json',
+            identifier: `${namespace}:blocks_json`,
+            filePath: 'RP/blocks.json',
+            contentJson: blocksJsonContent,
+          });
+          fileSummaryList.push({
+            path: 'RP/blocks.json',
+            name: 'blocks.json',
+            type: 'block',
+            action: existingBlocksJson ? 'updated' : 'created',
+          });
+        } else if (isArmor) {
+          // 1. Add 2D Item Icon
+          const itemIconPath = `RP/textures/items/${generatedTex.name}.png`;
+          filesToAddOrUpdate.push({
+            id: `file-tex-icon-${Date.now()}`,
+            type: 'texture',
+            name: `${generatedTex.name}.png`,
+            identifier: `${namespace}:${generatedTex.name}`,
+            filePath: itemIconPath,
+            contentJson: generatedTex.dataUrl,
+            imageDataUrl: generatedTex.dataUrl,
+            textureData: {
+              width: generatedTex.width,
+              height: generatedTex.height,
+              palette: generatedTex.palette,
+              grid: generatedTex.grid,
+            },
+          });
+          fileSummaryList.push({
+            path: itemIconPath,
+            name: `${generatedTex.name}.png (物品欄平面圖示)`,
+            type: 'texture',
+            action: 'created',
+          });
+
+          // 2. Add 3D Worn Model Texture (Layer 1: Helmet/Chestplate/Boots, or Layer 2: Leggings)
+          const isLeggings = /(leggings|護腿|褲子|legs)/i.test(prompt) || /(leggings|護腿|褲子)/i.test(result.itemId);
+          const layerSuffix = isLeggings ? '2' : '1';
+          const armorModelPath = `RP/textures/models/armor/${generatedTex.name}_${layerSuffix}.png`;
+          filesToAddOrUpdate.push({
+            id: `file-tex-model-${Date.now()}`,
+            type: 'texture',
+            name: `${generatedTex.name}_${layerSuffix}.png`,
+            identifier: `${namespace}:${generatedTex.name}_${layerSuffix}`,
+            filePath: armorModelPath,
+            contentJson: generatedTex.dataUrl,
+            imageDataUrl: generatedTex.dataUrl,
+            textureData: {
+              width: generatedTex.width,
+              height: generatedTex.height,
+              palette: generatedTex.palette,
+              grid: generatedTex.grid,
+            },
+          });
+          fileSummaryList.push({
+            path: armorModelPath,
+            name: `${generatedTex.name}_${layerSuffix}.png (3D人體穿戴展開圖 Layer ${layerSuffix})`,
+            type: 'texture',
+            action: 'created',
+          });
+
+          // 3. Update RP item_texture.json
+          const existingItemTex = existingComponents.find((c) => c.filePath === 'RP/textures/item_texture.json');
+          let currentTextureData: Record<string, any> = {};
+          if (existingItemTex?.contentJson) {
+            try {
+              const parsed = JSON.parse(existingItemTex.contentJson);
+              currentTextureData = parsed.texture_data || {};
+            } catch {}
+          }
+          currentTextureData[generatedTex.name] = { textures: `textures/items/${generatedTex.name}` };
+          const itemTextureJson = JSON.stringify({
+            resource_pack_name: projectName,
+            texture_name: 'atlas.items',
+            texture_data: currentTextureData,
+          }, null, 2);
+
+          filesToAddOrUpdate.push({
+            id: existingItemTex?.id || `file-itex-${Date.now()}`,
+            type: 'texture',
+            name: 'item_texture.json',
+            identifier: `${namespace}:item_texture`,
+            filePath: 'RP/textures/item_texture.json',
+            contentJson: itemTextureJson,
+          });
+          fileSummaryList.push({
+            path: 'RP/textures/item_texture.json',
+            name: 'item_texture.json',
+            type: 'texture',
+            action: existingItemTex ? 'updated' : 'created',
+          });
+        } else {
+          // Standard Item / Weapon / Tool
+          // 1. Add texture image file
+          filesToAddOrUpdate.push({
+            id: `file-tex-${Date.now()}`,
+            type: 'texture',
+            name: generatedTex.name,
+            identifier: `${namespace}:${generatedTex.name}`,
+            filePath: `RP/textures/items/${generatedTex.name}.png`,
+            contentJson: generatedTex.dataUrl,
+            imageDataUrl: generatedTex.dataUrl,
+            textureData: {
+              width: generatedTex.width,
+              height: generatedTex.height,
+              palette: generatedTex.palette,
+              grid: generatedTex.grid,
+            },
+          });
+          fileSummaryList.push({
+            path: `RP/textures/items/${generatedTex.name}.png`,
+            name: `${generatedTex.name}.png`,
+            type: 'texture',
+            action: 'created',
+          });
+
+          // 2. Update RP item_texture.json
+          const existingItemTex = existingComponents.find((c) => c.filePath === 'RP/textures/item_texture.json');
+          let currentTextureData: Record<string, any> = {};
+          if (existingItemTex?.contentJson) {
+            try {
+              const parsed = JSON.parse(existingItemTex.contentJson);
+              currentTextureData = parsed.texture_data || {};
+            } catch {}
+          }
+          currentTextureData[generatedTex.name] = { textures: `textures/items/${generatedTex.name}` };
+
+          const itemTextureJson = JSON.stringify({
+            resource_pack_name: projectName,
+            texture_name: 'atlas.items',
+            texture_data: currentTextureData,
+          }, null, 2);
+
+          filesToAddOrUpdate.push({
+            id: existingItemTex?.id || `file-itex-${Date.now()}`,
+            type: 'texture',
+            name: 'item_texture.json',
+            identifier: `${namespace}:item_texture`,
+            filePath: 'RP/textures/item_texture.json',
+            contentJson: itemTextureJson,
+          });
+          fileSummaryList.push({
+            path: 'RP/textures/item_texture.json',
+            name: 'item_texture.json',
+            type: 'texture',
+            action: existingItemTex ? 'updated' : 'created',
+          });
         }
-        currentTextureData[generatedTex.name] = { textures: `textures/items/${generatedTex.name}` };
-
-        const itemTextureJson = JSON.stringify({
-          resource_pack_name: projectName,
-          texture_name: 'atlas.items',
-          texture_data: currentTextureData,
-        }, null, 2);
-
-        filesToAddOrUpdate.push({
-          id: existingItemTex?.id || `file-itex-${Date.now()}`,
-          type: 'texture',
-          name: 'item_texture.json',
-          identifier: `${namespace}:item_texture`,
-          filePath: 'RP/textures/item_texture.json',
-          contentJson: itemTextureJson,
-        });
-        fileSummaryList.push({
-          path: 'RP/textures/item_texture.json',
-          name: 'item_texture.json',
-          type: 'texture',
-          action: existingItemTex ? 'updated' : 'created',
-        });
       } catch (texErr: any) {
         console.warn('AI texture generation in addon creation failed:', texErr.message);
       }
@@ -845,7 +1271,11 @@ ${projectContext}
 【重要執行要求】:
 1. 【專案真實檔案庫】上方已具體列出專案中【真實存在】的所有檔案與程式碼。當使用者詢問專案、檔案、遊戲內容或狀態時，你必須依據上述現有檔案與程式碼具體且詳細地解說，絕對不可忽視或回答「目前為空」！
 2. 【嚴格禁止預設食譜】絕對不可給出死板無聊的原版食譜（如兩顆鑽石加木棒、或原版紫水晶升級）。如果需要合成配方，必須展現上帝級 AI 的無限創造力，設計獨特的材料、儀式或合成機制！
-3. 【千變萬化】發揮神級創世創造力，給予使用者驚喜連連的體驗！`;
+3. 【千變萬化】發揮神級創世創造力，給予使用者驚喜連連的體驗！
+4. 【方塊六面映射與盔甲 3D 穿戴之最高全知實作】：
+   - 方塊（Block）：徹底掌握做法 A（六面相同，用 1 張平面圖由遊戲在 blocks.json 自動貼 6 面）與做法 B（六面不同如草地/熔爐/書櫃，在 blocks.json 用 textures: { "up": "...", "down": "...", "side": "..." } 分配不同獨立平面圖）。
+   - 盔甲（Armor）：徹底掌握雙重圖素體系（物品欄圖示 2D 純平面圖 vs 穿戴外觀 3D 展開圖 Layer 1 頭盔/胸甲/靴子 與 Layer 2 護腿，利用描圖改色法畫進官方骨骼小格子，透過 RP/attachables/ 綁定內建人體骨骼模型與動畫，自動將平面展開圖貼成 3D 穿戴盔甲）。
+   - 當使用者詢問、討論或要求製作時，必須精確剖析並靈活運用這些機制！`;
 
     res.write(`data: ${JSON.stringify({
       type: 'thought',
@@ -867,8 +1297,10 @@ ${projectContext}
           currentAction = '正在建構 Bedrock 自訂物品組件與神品數值...';
         } else if (currentCode.includes('"minecraft:recipe"')) {
           currentAction = '正在設計獨創奇幻合成配方 (絕非預設)...';
-        } else if (currentCode.includes('"minecraft:block"')) {
-          currentAction = '正在配置自訂方塊空間與幾何屬性...';
+        } else if (currentCode.includes('"minecraft:block"') || currentCode.includes('"textures":')) {
+          currentAction = '正在配置自訂方塊空間與六面材質映射...';
+        } else if (currentCode.includes('"geometry.humanoid.armor"') || currentCode.includes('"minecraft:attachable"')) {
+          currentAction = '正在綁定盔甲 3D 人體穿戴骨骼與 Attachables 展開圖...';
         } else if (currentCode.includes('"minecraft:entity"')) {
           currentAction = '正在撰寫實體行為與神話 AI 尋路規則...';
         } else {
