@@ -1,0 +1,6 @@
+{
+  "name": "CraftGPT",
+  "description": "媲美 ChatGPT 的超強全能 Minecraft 模組與 Add-on AI 工作台，具備無額度限制自然對話、視覺化模組製作、合成配方台、材質像素編輯、實體與代碼生成及一鍵 .mcaddon 匯出。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
