@@ -23,5 +23,6 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": ["AI一定要看 不可刪除/**", "node_modules", "dist"]
 }

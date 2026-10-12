@@ -128,7 +128,7 @@ const ai = apiKey
   : null;
 
 // PURE AI 1024x1024 Ultra-HD Vector & Texture Synthesis Engine
-// Generates magnificent 1024x1024 SVG vector art with rich gradients, highlights, and particles
+// 100% Pure Generative AI - Strictly NO mock or hardcoded templates
 async function generateAi1024Texture(
   prompt: string,
   editInstruction?: string,
@@ -144,233 +144,153 @@ async function generateAi1024Texture(
 }> {
   if (!ai) throw new Error('伺服器未配置 GEMINI_API_KEY');
 
-  const systemPrompt = `You are a legendary Principal 2D Concept Artist and SVG Master at a world-class AAA game studio (crafting iconic assets like Elden Ring, World of Warcraft, and League of Legends).
-Your task is to hand-craft a breathtaking, museum-grade 1024x1024 SVG illustration based on: "${prompt}".
+  const systemPrompt = `You are the Principal Lead Concept Artist and Technical SVG Director at a world-class AAA game studio (Blizzard, Riot Games, Bungie, CD Projekt).
+Your mission: Hand-craft a jaw-dropping, ultra-high-definition 1024x1024 vector game asset strictly matching the user's concept: "${prompt}".
 
-CRITICAL ARTISTIC MANDATES:
-1. 2048+ TRUE COLOR PALETTE & HIGH-DENSITY MULTI-STOP GRADIENTS:
-   - CRITICAL: The user demands rich, full-gamut coloring with 2048+ truecolor depth and volumetric depth (ABSOLUTELY NO flat fills, cartoonish blocks, or cheap clipart circles!).
-   - Define at least 8 to 15 rich <linearGradient> and <radialGradient> tags in <defs>.
-   - Each gradient MUST contain 4 to 8 color stops defining realistic material lighting:
-     * Deep ambient occlusion shadow (e.g., #0b0302 -> #1c0804)
-     * Rich base metal / material mid-tone (e.g., #5c1404 -> #992408 -> #d43b0c)
-     * High specular light reflection (e.g., #ff8438 -> #ffd066 -> #ffffff)
-     * Rim bounce lighting and sub-surface energy emission
-2. MASTERWORK ANATOMY & SCULPTING (STRICT BAN ON PRIMITIVE SHAPES):
-   - IF A SHIELD (盾牌):
-     * Draw a magnificent, layered heater/tower/gothic shield with a heavy beveled steel/obsidian outer rim, reinforced rivets, and chamfered facets.
-     * Layered inner chassis with dragon scale plates, gothic fluting, or ornate segmented armor plating.
-     * High-relief central boss: sculpted dragon head, titan crest, celestial sun, or lion emblem with deep carved relief paths (<path d="..." fill="url(#...)" />).
-     * Glowing runic channels and molten fissures radiating with multi-stop glowing energy gradients.
-     * Specular sheen sweeps (curved semi-transparent white-to-transparent highlight arcs).
-   - IF A WEAPON (神劍/戰斧/法杖):
-     * Distinct dual-faceted beveled cutting edges (lit side vs shadow side).
-     * Intricate wing-shaped crossguards, engraved runes, wrapped hilt textures, glowing crystal pommels, and floating embers.
-   - IF ARMOR / HELMET / RELIC:
-     * Symmetrical heroic presence with articulated plate ridges, volumetric shadows, and ambient glow.
-3. CANVAS & SPECIFICATIONS:
-   - Root tag: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-   - Transparent background (do NOT draw a full-screen solid rectangle).
-   - Heroic scale filling ~75-85% of the 1024x1024 frame.
-   - Include <filter id="glow"> with feGaussianBlur and feMerge for incandescent effects.
-   - Output ONLY valid JSON in this schema:
+ABSOLUTE ANTI-MINIMALISM & 2048+ COLOR SPECTRUM MANDATE:
+1. STRICT ZERO-MINIMALISM BAN:
+   - A dark cube with only 2-3 thin lines and a few dots is an UNACCEPTABLE FAILURE.
+   - The asset MUST be dense, richly detailed, and contain at least 45 to 70 layered SVG elements!
+   - Every single face, bevel, edge, and core must have physical depth, multi-stop lighting, and high visual interest.
+
+2. 2048-COLOR GRADIENT SPECTRUM & RICH COLORFUL LIGHTING:
+   - Define at least 12 to 16 distinct <linearGradient> and <radialGradient> definitions in <defs>.
+   - Each gradient MUST contain 4 to 6 color stops to simulate rich lighting physics:
+     * Deep ambient shadow (e.g., #020617, #090d16, #1e112a, #03131e)
+     * Rich metallic chassis tones (e.g., #1e293b, #334155, #475569, #64748b, #94a3b8)
+     * Vibrant emissive neons & plasma (e.g., Cyan #00f5ff, Cobalt #0284c7, Purple #a855f7, Magenta #f43f5e, Azure #38bdf8)
+     * Radiant core & gold highlights (e.g., #fbbf24, #f59e0b, #d97706, #fffbeb)
+     * Piercing specular rim & flare glints (e.g., #ffffff, #fef08a)
+   - Combine contrasting, harmonious color spectrums (e.g. Obsidian Midnight + Glowing Cyan Veins + Plasma Violet Pulses + Molten Gold Accents + Pure Diamond Glints).
+
+3. FOR BLOCKS / CUBES (方塊 / 立方體 3D ISOMETRIC ARCHITECTURE):
+   - Draw an unmistakable 3D ISOMETRIC CUBE filling 75% of the 1024x1024 canvas (centered around 512, 512).
+   - TOP FACE (High-Key Direct Light):
+     * Polygon from top (512, 210) to right (790, 370), center (512, 530), left (234, 370).
+     * Recessed inner power matrix with beveled titanium rim.
+     * Glowing central reactor eye or runic emblem pulsating with multi-stop radial gradient.
+   - LEFT FACE (Mid-Tone Direct Shadow):
+     * Polygon from (234, 370), (512, 530), (512, 830), (234, 670).
+     * Stepped armor plates with chamfered bevels, ventilation slots with internal glowing coils, branching energy bus lines.
+   - RIGHT FACE (Deep Ambient Shadow):
+     * Polygon from (512, 530), (790, 370), (790, 670), (512, 830).
+     * Heavy engraved conduits cutting through dark obsidian relief, glowing data conduits with neon glow filters.
+   - 7 VISIBLE VERTICES & BEVELS:
+     * Heavy bolted corner reinforcement caps on all vertices with chamfers, rivets, and razor specular highlights.
+   - ATMOSPHERIC PARTICLES & LENS GLINTS:
+     * At least 12-16 floating energy shards/diamonds (<polygon points="..."/>) and 4-point star lens flares (<path d="M x,y-14 Q x,y x+14,y Q x,y x,y+14 Q x,y x-14,y Z" fill="#ffffff"/>) around the cube!
+
+4. FOR WEAPONS / TOOLS / ARMOR / ITEMS:
+   - Multi-tiered blades/heads, beveled edges, intricate hilt/crossguard, glowing rune channels, multi-stop elemental auras, and floating sparks.
+
+5. CANVAS & TRANSPARENCY:
+   - Root tag MUST be <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">.
+   - DO NOT draw a full-canvas opaque solid background rectangle. Keep background transparent.
+   - Filter glow: <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>.
+
+RESPONSE SCHEMA (RETURN ONLY RAW VALID JSON):
 {
-  "name": "snake_case_identifier",
-  "displayName": "繁體中文史詩全名",
-  "description": "Short visual description",
+  "name": "snake_case_english_name",
+  "displayName": "繁體中文物品名稱",
+  "description": "簡短霸氣物品描述",
   "svg": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 1024 1024\\" width=\\"1024\\" height=\\"1024\\">...</svg>"
 }`;
 
   const userPrompt = editInstruction
-    ? `【AI 修改與演化指令】
+    ? `【AI 修改微調進化指令】
 原始主題: "${prompt}"
-修改指令: "${editInstruction}"
-${previousSvg ? `請參考前版外觀並融入修改:\n${previousSvg.substring(0, 1000)}...` : ''}
-請以此重新建構與昇華出全新的 1024x1024 超高畫質神級圖標。`
-    : `請為此物品生成 1024x1024 超高畫質神級圖標: "${prompt}"`;
+修改進化指令: "${editInstruction}"
+${previousSvg ? `請以此先前的 SVG 造型為基礎進行進化與昇華重構:
+${previousSvg.substring(0, 1500)}...` : ''}
+請以此昇華創造出全新的 1024x1024 超高畫質神級圖標。`
+    : `請為以下主題生成 1024x1024 超高畫質神級圖標: "${prompt}"`;
 
-  const models = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
+  const models = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
   let lastErr: any = null;
 
   for (const model of models) {
-    try {
-      const resp = await ai.models.generateContent({
-        model,
-        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: 'application/json',
-          temperature: 0.88,
-        },
-      });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        console.log(`[AI 1024 Engine] Calling model ${model} (attempt ${attempt + 1}) for: "${prompt}"...`);
+        const resp = await ai.models.generateContent({
+          model,
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: 'application/json',
+            temperature: 0.72,
+          },
+        });
 
-      if (resp.text) {
-        let rawText = resp.text.trim();
-        // Remove code fences if any
-        if (rawText.startsWith('```')) {
-          rawText = rawText.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
-        }
+        if (resp.text) {
+          let rawText = resp.text.trim();
+          if (rawText.startsWith('```')) {
+            rawText = rawText.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+          }
 
-        let parsed: any = null;
-        try {
-          parsed = JSON.parse(rawText);
-        } catch {
-          // If JSON parse fails, try extracting svg directly
-          const svgMatch = rawText.match(/<svg[\s\S]*<\/svg>/);
-          if (svgMatch) {
-            parsed = {
-              name: 'custom_item',
-              displayName: prompt,
-              description: prompt,
-              svg: svgMatch[0],
+          let parsed: any = null;
+          try {
+            parsed = JSON.parse(rawText);
+          } catch {
+            const svgMatch = rawText.match(/<svg[\s\S]*<\/svg>/);
+            if (svgMatch) {
+              parsed = {
+                name: 'custom_item',
+                displayName: prompt,
+                description: prompt,
+                svg: svgMatch[0],
+              };
+            }
+          }
+
+          if (parsed && parsed.svg) {
+            let svg = parsed.svg.trim();
+            if (!svg.startsWith('<svg')) {
+              const match = svg.match(/<svg[\s\S]*<\/svg>/);
+              if (match) svg = match[0];
+            }
+
+            // Strip any full-screen opaque rectangles that cover the background
+            svg = svg.replace(/<rect\s+width="1024"\s+height="1024"[^>]*\/>/gi, '');
+            svg = svg.replace(/<rect\s+fill="[^"]*"\s+width="1024"\s+height="1024"[^>]*\/>/gi, '');
+            svg = svg.replace(/<rect[^>]*width="100%"[^>]*height="100%"[^>]*\/>/gi, '');
+
+            // Ensure proper attributes
+            if (!svg.includes('viewBox=')) {
+              svg = svg.replace('<svg', '<svg viewBox="0 0 1024 1024" width="1024" height="1024"');
+            }
+
+            const rawName = (parsed.name || prompt).toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 28) || 'custom_item';
+            const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+            console.log(`[AI 1024 Engine] Successfully generated via ${model}: ${rawName} (${svg.length} bytes SVG)`);
+
+            return {
+              name: rawName,
+              targetPath: `RP/textures/items/${rawName}.png`,
+              dataUrl: svgDataUrl,
+              svg,
+              width: 1024,
+              height: 1024,
+              description: parsed.description || parsed.displayName || prompt,
             };
           }
         }
-
-        if (parsed && parsed.svg) {
-          let svg = parsed.svg.trim();
-          if (!svg.startsWith('<svg')) {
-            const match = svg.match(/<svg[\s\S]*<\/svg>/);
-            if (match) svg = match[0];
-          }
-
-          // Ensure proper attributes
-          if (!svg.includes('viewBox=')) {
-            svg = svg.replace('<svg', '<svg viewBox="0 0 1024 1024" width="1024" height="1024"');
-          }
-
-          const rawName = (parsed.name || prompt).toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 28) || 'custom_item';
-          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-
-          return {
-            name: rawName,
-            targetPath: `RP/textures/items/${rawName}.png`,
-            dataUrl: svgDataUrl,
-            svg,
-            width: 1024,
-            height: 1024,
-            description: parsed.description || parsed.displayName || prompt,
-          };
+      } catch (e: any) {
+        console.warn(`Model ${model} (attempt ${attempt + 1}) failed:`, e.message);
+        lastErr = e;
+        const isTransient = /503|429|UNAVAILABLE|high demand|resource_exhausted/i.test(e.message || '');
+        if (isTransient && attempt === 0) {
+          await new Promise((r) => setTimeout(r, 1000));
+        } else {
+          break; // move on to next model in list
         }
       }
-    } catch (e: any) {
-      console.warn(`Model ${model} failed for 1024 texture:`, e.message);
-      lastErr = e;
     }
   }
 
-  // Fallback: If AI JSON returned without svg, generate high-end procedural vector SVG with rich multi-stop gradients
-  try {
-    const isShield = /(盾|shield|guard|aegis|buckler)/i.test(prompt);
-    const fallbackSvg = isShield
-      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <defs>
-    <radialGradient id="magmaCore" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="25%" stop-color="#ffd000"/>
-      <stop offset="55%" stop-color="#ff4800"/>
-      <stop offset="80%" stop-color="#800a00"/>
-      <stop offset="100%" stop-color="transparent"/>
-    </radialGradient>
-    <linearGradient id="shieldRim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fff8db"/>
-      <stop offset="20%" stop-color="#e5b026"/>
-      <stop offset="50%" stop-color="#8c5806"/>
-      <stop offset="75%" stop-color="#472602"/>
-      <stop offset="100%" stop-color="#140700"/>
-    </linearGradient>
-    <linearGradient id="shieldPlate" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#2d120a"/>
-      <stop offset="35%" stop-color="#541b0b"/>
-      <stop offset="70%" stop-color="#1c0703"/>
-      <stop offset="100%" stop-color="#0a0201"/>
-    </linearGradient>
-    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
-      <stop offset="40%" stop-color="#ffc83b" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="aura">
-      <feGaussianBlur stdDeviation="12" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <!-- Outer Shield Aura -->
-  <path d="M 512,80 C 780,80 880,240 880,500 C 880,740 680,880 512,940 C 344,880 144,740 144,500 C 144,240 244,80 512,80 Z" fill="url(#magmaCore)" opacity="0.3" filter="url(#aura)"/>
-  <!-- Heavy Rim Armor -->
-  <path d="M 512,100 C 760,100 850,250 850,490 C 850,720 660,850 512,910 C 364,850 174,720 174,490 C 174,250 264,100 512,100 Z" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="4" filter="url(#aura)"/>
-  <!-- Inner Segmented Armor Field -->
-  <path d="M 512,140 C 720,140 800,270 800,480 C 800,680 630,800 512,860 C 394,800 224,680 224,480 C 224,270 304,140 512,140 Z" fill="url(#shieldPlate)"/>
-  <!-- Specular Sheen Arc -->
-  <path d="M 512,140 C 720,140 800,270 800,480 C 650,420 520,300 512,140 Z" fill="url(#sheen)"/>
-  <!-- Central Titan Embossed Boss & Crest -->
-  <path d="M 512,240 L 640,360 L 640,560 L 512,680 L 384,560 L 384,360 Z" fill="url(#shieldRim)" stroke="#ffb700" stroke-width="6" filter="url(#aura)"/>
-  <circle cx="512" cy="460" r="85" fill="url(#magmaCore)" filter="url(#aura)"/>
-  <circle cx="512" cy="460" r="50" fill="#ffffff" opacity="0.8"/>
-  <!-- Rivets & Runes -->
-  <circle cx="280" cy="240" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="744" cy="240" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="210" cy="480" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="814" cy="480" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="340" cy="720" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="684" cy="720" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-  <circle cx="512" cy="850" r="14" fill="url(#shieldRim)" stroke="#ffd000" stroke-width="2"/>
-</svg>`
-      : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <defs>
-    <radialGradient id="celestialGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
-      <stop offset="30%" stop-color="#818cf8" stop-opacity="0.6"/>
-      <stop offset="65%" stop-color="#312e81" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="20%" stop-color="#a5f3fc"/>
-      <stop offset="50%" stop-color="#38bdf8"/>
-      <stop offset="80%" stop-color="#1d4ed8"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </linearGradient>
-    <linearGradient id="goldTrim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fffbeb"/>
-      <stop offset="25%" stop-color="#fef08a"/>
-      <stop offset="55%" stop-color="#eab308"/>
-      <stop offset="80%" stop-color="#a16207"/>
-      <stop offset="100%" stop-color="#451a03"/>
-    </linearGradient>
-    <filter id="aura">
-      <feGaussianBlur stdDeviation="16" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <circle cx="512" cy="512" r="420" fill="url(#celestialGlow)"/>
-  <path d="M 512,100 L 560,220 L 536,720 L 512,790 L 488,720 L 464,220 Z" fill="url(#bladeGrad)" filter="url(#aura)"/>
-  <path d="M 512,100 L 526,220 L 518,740 L 512,770 L 506,740 L 498,220 Z" fill="#ffffff" opacity="0.85"/>
-  <path d="M 360,720 L 512,670 L 664,720 L 512,760 Z" fill="url(#goldTrim)" filter="url(#aura)"/>
-  <circle cx="512" cy="720" r="34" fill="#38bdf8" filter="url(#aura)"/>
-  <rect x="494" y="760" width="36" height="150" rx="10" fill="url(#goldTrim)"/>
-  <circle cx="512" cy="930" r="30" fill="url(#goldTrim)"/>
-  <circle cx="512" cy="930" r="16" fill="#38bdf8"/>
-</svg>`;
-    const safeName = prompt.toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 24) || 'epic_item';
-    return {
-      name: safeName,
-      targetPath: `RP/textures/items/${safeName}.png`,
-      dataUrl: `data:image/svg+xml;utf8,${encodeURIComponent(fallbackSvg)}`,
-      svg: fallbackSvg,
-      width: 1024,
-      height: 1024,
-      description: prompt,
-    };
-  } catch {}
-
-  throw lastErr || new Error('AI 1024x1024 生成失敗，請再試一次');
+  // 100% PURE AI: Strictly comply with user rule (絕對不可以使用已經寫好的程式來冒充AI生成的圖片)
+  throw lastErr || new Error('AI 生成暫時繁忙或回應異常，請稍後重試');
 }
 
 // Ensure alias exists for all callers
@@ -542,7 +462,27 @@ You possess infinite creativity, profound Bedrock (1.20 - 1.21+) & Java modding 
      3. ZIP 完整原始檔下載：供使用者自由解壓縮至遊戲 com.mojang 目錄進行即時除錯與檔案修改。
      4. 行為包 (BP.mcpack) 與資源包 (RP.mcpack) 獨立下載通道。
 
-9. 💬 【最高水準對話風格】:
+9. ⛏️ 【麥塊術語智能神識：『稿子』與『鎬子 (Pickaxe)』智慧解析與組件架構】:
+   - 當使用者輸入「稿子」、「生成稿子」、「做一把稿子」時，CraftGPT 必須展現出神級麥塊 AI 的頂級智慧，第一時間洞察使用者意圖為「鎬子（Pickaxe / 鶴嘴鎬 / 採礦鎬）」（為中文注音/拼音輸入法最常見同音字），絕對不可生成文稿、文章草稿或誤生成普通刀劍！
+   - 回覆時要展現超凡專業度：「神級洞察：檢測到指令『生成稿子』——在麥塊世界中，這正是冒險家最核心的採礦神器『鎬子（Pickaxe）』！已為您自動校正並以頂級規格鍛造！」
+   - 鎬子之 Bedrock 1.21+ 完整標準規範：
+     * minecraft:digger 組件:
+       - use_efficiency: true
+       - destroy_speeds:
+         - stone (速度 16~24)
+         - cobblestone (速度 16~24)
+         - deepslate (速度 18~26)
+         - obsidian (速度 24~32)
+         - iron_ore, gold_ore, diamond_ore, ancient_debris 等各類礦石
+     * tags: ["minecraft:is_pickaxe", "minecraft:digger"]
+     * minecraft:hand_equipped: true
+     * minecraft:enchantable: { "slot": "pickaxe", "value": 30 }
+     * minecraft:durability: { "max_durability": 3200 }
+     * minecraft:damage: { "value": 8 } (具備近戰攻擊力)
+     * 特殊技能：連鎖挖礦 (Vein Miner)、熔煉採集 (Auto-Smelt)、幸運倍率或爆破採礦衝擊波！
+     * 貼圖外型：展現經典雙向弧形鎬頭、鑿礦尖峰、強化中軸套筒與人體工學長柄！
+
+10. 💬 【最高水準對話風格】:
    - 使用流暢、氣勢磅礴且專業的繁體中文。
    - 排版結構優雅清晰，融合深度技術解析與史詩感設計美學。`;
 
@@ -551,7 +491,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     hasApiKey: Boolean(apiKey),
-    model: 'gemini-3.1-flash-lite',
+    model: 'gemini-3.8-flash',
   });
 });
 
@@ -730,7 +670,7 @@ app.post('/api/export-addon', async (req, res) => {
 // Dedicated 1024x1024 Texture Generation Endpoint - 100% Pure Generative AI (No keywords, No templates)
 app.post('/api/generate-texture', async (req, res) => {
   try {
-    const { prompt, editInstruction, previousSvg } = req.body;
+    const { prompt, editInstruction, previousSvg, angleMode, referenceImage } = req.body;
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
       res.status(400).json({ success: false, error: '請輸入 AI 材質提示詞' });
       return;
@@ -745,7 +685,17 @@ app.post('/api/generate-texture', async (req, res) => {
     });
   } catch (err: any) {
     console.error('AI 1024x1024 Texture Generation Error:', err);
-    res.status(500).json({ success: false, error: err.message || 'AI 生成 1024x1024 材質失敗，請再試一次' });
+    let msg = err.message || 'AI 生成 1024x1024 材質失敗，請再試一次';
+    try {
+      const parsed = JSON.parse(msg);
+      if (parsed?.error?.message) {
+        msg = parsed.error.message;
+      }
+    } catch {}
+    if (/high demand|503|UNAVAILABLE|overloaded/i.test(msg)) {
+      msg = 'AI 雲端算力目前瞬間負載較高，系統已自動排程，請稍候 3 秒後再次點擊「開始生成」即可！';
+    }
+    res.status(500).json({ success: false, error: msg });
   }
 });
 
@@ -757,7 +707,7 @@ async function streamWithAutoFallback(
 ): Promise<string> {
   if (!ai) throw new Error('GEMINI_API_KEY is not configured');
 
-  const models = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
+  const models = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
   let lastError: any = null;
 
   for (const model of models) {
@@ -792,7 +742,7 @@ async function streamWithAutoFallback(
   // Final unary safety net
   try {
     const unaryRes = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite',
+      model: 'gemini-3.8-flash',
       contents,
       config: {
         systemInstruction,
@@ -869,7 +819,15 @@ ${JSON.stringify(existingFilesList.slice(0, 35), null, 2)}
    - 必須清楚區分「物品欄圖示 (Item Icon 2D)」與「穿在身上的 3D 展開圖 (Layer 1: 頭盔/胸甲/靴子, Layer 2: 護腿)」。
    - 生成 RP/attachables/ 檔案綁定 geometry.humanoid.armor.<slot> 與對應展開圖，使平面的展開圖依照人體骨骼自動變成 3D 盔甲！
    - BP/items/ 需包含 minecraft:wearable 與 minecraft:armor 組件。
-6. 輸出純 JSON 格式：
+6. 【稿子 / 鎬子 (Pickaxe) 意圖精準識別與採礦挖礦組件規範】：
+   - 當使用者提到「稿子」、「生成稿子」、「做一把稿子」、「鎬子」或「採礦鎬」時，這是麥塊冒險家最核心的工具「鎬子（Pickaxe）」，絕非文稿或草稿！
+   - 物品組件 BP/items/ 必須嚴格包含標準的採礦挖掘組件：
+     * "minecraft:digger": 包含 "use_efficiency": true, "destroy_speeds": [ 涵蓋 stone (speed 16~20), deepslate (speed 18~24), obsidian (speed 26~32), ores 等各類礦石 ]
+     * "minecraft:hand_equipped": true
+     * "minecraft:enchantable": { "slot": "pickaxe", "value": 30 }
+     * "minecraft:durability": { "max_durability": 3200 }
+     * "tags": ["minecraft:is_pickaxe", "minecraft:digger"]
+7. 輸出純 JSON 格式：
 {
   "summary": "華麗磅礴的繁體中文一句話總結",
   "itemId": "snake_case_identifier",
@@ -891,7 +849,7 @@ ${JSON.stringify(existingFilesList.slice(0, 35), null, 2)}
 
   try {
     let aiRespText = '';
-    const genModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
+    const genModels = ['gemini-3.8-flash'];
     for (const m of genModels) {
       try {
         const resp = await ai.models.generateContent({
